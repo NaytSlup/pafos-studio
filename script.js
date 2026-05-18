@@ -71,7 +71,7 @@ document.querySelector('.main-form').addEventListener('submit', async function(e
     btn.textContent = 'Отправка...';
 
     try {
-        const res = await fetch('https://api.pafos-studio.ru', {
+        const res = await fetch('/send-form', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
