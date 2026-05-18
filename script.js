@@ -31,74 +31,104 @@ function updateCalc() {
 }
 
 inputs.forEach(id => {
-    document.getElementById(id).addEventListener('input', updateCalc);
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateCalc);
 });
 
 // ===== МАСКА ТЕЛЕФОНА =====
-IMask(document.querySelector('[name="phone"]'), {
-    mask: '+{7} (000) 000-00-00'
-});
+const phoneEl = document.querySelector('[name="phone"]');
+if (phoneEl) {
+    IMask(phoneEl, {
+        mask: '+{7} (000) 000-00-00'
+    });
+}
 
 // ===== ВАЛИДАЦИЯ ФОРМЫ =====
-document.querySelector('.main-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
+const form = document.querySelector('.main-form');
+if (form) {
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-    const nameInput  = this.querySelector('[name="name"]');
-    const phoneInput = this.querySelector('[name="phone"]');
-    const btn        = this.querySelector('.submit-btn');
+        const nameInput  = this.querySelector('[name="name"]');
+        const phoneInput = this.querySelector('[name="phone"]');
+        const btn        = this.querySelector('.submit-btn');
 
-    // Сброс ошибок
-    clearError(nameInput);
-    clearError(phoneInput);
+        // Безопасный сброс ошибок перед проверкой
+        clearError(nameInput);
+        clearError(phoneInput);
 
-    let valid = true;
+        let valid = true;
 
-    // Проверка имени
-    if (nameInput.value.trim().length < 2) {
-        showError(nameInput, 'Введите ваше имя');
-        valid = false;
-    }
-
-    // Проверка телефона — маска даёт ровно 18 символов
-    if (phoneInput.value.replace(/\D/g, '').length < 11) {
-        showError(phoneInput, 'Введите полный номер телефона');
-        valid = false;
-    }
-
-    if (!valid) return;
-
-    btn.disabled = true;
-    btn.textContent = 'Отправка...';
-
-    try {
-        const res = await fetch('/send-form', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name:   nameInput.value.trim(),
-                phone:  phoneInput.value.trim(),
-                social: this.querySelector('[name="social"]').value.trim(),
-                about:  this.querySelector('[name="about"]').value.trim()
-            })
-        });
-
-        if (res.ok) {
-            btn.textContent = '✅ Анкета отправлена!';
-            btn.style.background = '#1a8a6e';
-            this.reset();
-            // Сброс маски после reset()
-            phoneInput.dispatchEvent(new Event('input'));
-        } else {
-            throw new Error();
+        // Проверка имени
+        if (!nameInput || nameInput.value.trim().length < 2) {
+            showError(nameInput, 'Введите ваше имя');
+            valid = false;
         }
-    } catch {
-        btn.textContent = '❌ Ошибка, попробуйте снова';
-        btn.disabled = false;
-    }
-});
 
+        // Проверка телефона — маска даёт ровно 18 символов
+        if (!phoneInput || phoneInput.value.replace(/\D/g, '').length < 11) {
+            showError(phoneInput, 'Введите полный номер телефона');
+            valid = false;
+        }
+
+        if (!valid) return;
+
+        btn.disabled = true;
+        const originalBtnText = btn.textContent;
+        btn.textContent = 'Отправка...';
+
+        try {
+            const res = await fetch('/send-form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name:   nameInput.value.trim(),
+                    phone:  phoneInput.value.trim(),
+                    social: this.querySelector('[name="social"]').value.trim(),
+                    about:  this.querySelector('[name="about"]').value.trim()
+                })
+            });
+
+            // Проверяем статус ответа сервера
+            if (res.ok) {
+                const result = await res.json();
+                
+                // Проверяем, что воркер успешно отправил в ТГ
+                if (result.ok) {
+                    btn.textContent = '✅ Анкета отправлена!';
+                    btn.style.background = '#1a8a6e';
+                    this.reset();
+                    phoneInput.dispatchEvent(new Event('input'));
+                } else {
+                    throw new Error(result.error || 'Worker error');
+                }
+            } else {
+                throw new Error('Server response not ok');
+            }
+        } catch (err) {
+            console.error('Ошибка отправки формы:', err);
+            btn.textContent = '❌ Ошибка, попробуйте снова';
+            btn.style.background = '#d93838'; // Делаем кнопку красной при ошибке
+            
+            // Через 4 секунды возвращаем кнопку в исходное состояние для повторной попытки
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = originalBtnText;
+                btn.style.background = ''; 
+            }, 4000);
+        }
+    });
+}
+
+// Функции вывода ошибок, переписанные на работу "на одном уровне" (nextElementSibling)
 function showError(input, message) {
+    if (!input) return;
     input.classList.add('input--error');
+    
+    // Проверяем, нет ли уже ошибки, чтобы не дублировать
+    const nextEl = input.nextElementSibling;
+    if (nextEl && nextEl.classList.contains('input-error-msg')) return;
+
     const err = document.createElement('span');
     err.className = 'input-error-msg';
     err.textContent = message;
@@ -106,9 +136,14 @@ function showError(input, message) {
 }
 
 function clearError(input) {
+    if (!input) return;
     input.classList.remove('input--error');
-    const msg = input.parentElement.querySelector('.input-error-msg');
-    if (msg) msg.remove();
+    
+    // Ищем ошибку строго как следующий элемент за инпутом
+    const msg = input.nextElementSibling;
+    if (msg && msg.classList.contains('input-error-msg')) {
+        msg.remove();
+    }
 }
 
 // Инициализация при загрузке
