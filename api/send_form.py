@@ -1,4 +1,4 @@
-#!/opt/python/python-3.8.8/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 import json
