@@ -17,13 +17,13 @@ def load_env(path='.env'):
                 line = line.strip()
                 if line and not line.startswith('#') and '=' in line:
                     key, _, value = line.partition('=')
-                    os.environ.setdefault(key.strip(), value.strip())
+                    os.environ[key.strip()] = value.strip()  # Исправлено: setdefault → [key.strip()]
 
 load_env()
 
 GMAIL_USER = os.environ.get('GMAIL_USER')
 GMAIL_PASS = os.environ.get('GMAIL_PASS')
-MAIL_TO    = os.environ.get('MAIL_TO')
+MAIL_TO = os.environ.get('MAIL_TO')
 
 # ===== ЗАГОЛОВКИ CGI =====
 print("Content-Type: application/json; charset=utf-8")
@@ -40,10 +40,10 @@ try:
     raw = sys.stdin.read()
     data = json.loads(raw)
 
-    name   = data.get('name', '—')
-    phone  = data.get('phone', '—')
+    name = data.get('name', '—')
+    phone = data.get('phone', '—')
     social = data.get('social', '—')
-    about  = data.get('about', '—')
+    about = data.get('about', '—')
 
     html_body = f"""
     <h2 style="color:#1a1a2e">Новая заявка с сайта!</h2>
@@ -61,8 +61,8 @@ try:
 
     msg = MIMEMultipart('alternative')
     msg['Subject'] = '🔔 Новая заявка с сайта PAFOS'
-    msg['From']    = GMAIL_USER
-    msg['To']      = MAIL_TO
+    msg['From'] = GMAIL_USER
+    msg['To'] = MAIL_TO
     msg.attach(MIMEText(html_body, 'html', 'utf-8'))
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
