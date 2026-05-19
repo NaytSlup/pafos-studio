@@ -13,33 +13,10 @@ jobs:
     - name: Get latest code
       uses: actions/checkout@v4
     
-    - name: Sync main website files
+    - name: Sync files via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: /
-        # Исключаем локальную папку api, чтобы она не дублировалась в корне сервера
-        exclude: |
-          **/api/**
-          .git*
-          .github/**
-
-    - name: Sync Python script to cgi-bin
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./api/
-        server-dir: /cgi-bin/
-
-    # Выставляем права 755 для Python-скрипта, чтобы сервер Reg.ru разрешил его запуск
-    - name: Change script permissions (CHMOD 755)
-      uses: garygrossgarten/github-action-ssh@release
-      with:
-        host: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        command: chmod 755 ./cgi-bin/send_form.py
+        server-dir: / # Все папки (включая локальную api/) полетят в корень сайта
