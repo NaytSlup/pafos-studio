@@ -58,7 +58,7 @@ try {
     // Настройка заголовков для отправки HTML-письма
     $headers = "MIME-Version: 1.0\r\n";
     $headers .= "Content-Type: text/html; charset=utf-8\r\n";
-    $headers .= "From: <{$gmail_user}>\r\n";
+    $headers .= "From: PAFOS Studio <no-reply@pafos-studio.ru>\r\n";
     $headers .= "Reply-To: <{$gmail_user}>\r\n";
 
     // Отправка через стандартную функцию mail() хостинга Reg.ru
