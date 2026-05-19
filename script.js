@@ -86,7 +86,7 @@ if (form) {
             `📝 О себе: ${about || '—'}`;
 
         try {
-            const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+            const res = await fetch(`https://tg-api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
