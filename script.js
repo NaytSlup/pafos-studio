@@ -39,7 +39,7 @@ if (phoneEl) {
     });
 }
 
-// ===== ВАЛИДАЦИЯ И ОТПРАВКА ФОРМЫ В ТЕЛЕГРАМ =====
+// ===== ВАЛИДАЦИЯ И ОТПРАВКА ФОРМЫ =====
 const form = document.querySelector('.main-form');
 if (form) {
     form.addEventListener('submit', async function(e) {
@@ -70,28 +70,15 @@ if (form) {
         const originalBtnText = btn.textContent;
         btn.textContent = 'Отправка...';
 
-        const TG_TOKEN  = '8818967086:AAGYUYHGhf6JXoC3IxQxRQ8bBMFnVzSysSc';
-        const TG_CHAT_ID = '420129066';
-
-        const name   = nameInput.value.trim();
-        const phone  = phoneInput.value.trim();
-        const social = this.querySelector('[name="social"]').value.trim();
-        const about  = this.querySelector('[name="about"]').value.trim();
-
-        const messageText =
-            `🔔 Новая заявка с сайта!\n\n` +
-            `👤 Имя: ${name || '—'}\n` +
-            `📞 Телефон: ${phone || '—'}\n` +
-            `💬 Telegram / WA: ${social || '—'}\n` +
-            `📝 О себе: ${about || '—'}`;
-
         try {
-            const res = await fetch(`https://tg-api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+            const res = await fetch('/send_form.py', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: TG_CHAT_ID,
-                    text: messageText
+                    name:   nameInput.value.trim(),
+                    phone:  phoneInput.value.trim(),
+                    social: this.querySelector('[name="social"]').value.trim(),
+                    about:  this.querySelector('[name="about"]').value.trim()
                 })
             });
 
@@ -103,7 +90,7 @@ if (form) {
                 this.reset();
                 phoneInput.dispatchEvent(new Event('input'));
             } else {
-                throw new Error(result.description || 'Telegram error');
+                throw new Error(result.error || 'Server error');
             }
         } catch (err) {
             console.error('Ошибка отправки формы:', err);
