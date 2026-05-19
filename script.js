@@ -70,7 +70,7 @@ if (form) {
         const originalBtnText = btn.textContent;
         btn.textContent = 'Отправка...';
 
-        const TG_TOKEN  = '8355809233:AAEFVYvgGUS10yD40zBJVHQdx7ziza54NBU';
+        const TG_TOKEN  = '8818967086:AAGYUYHGhf6JXoC3IxQxRQ8bBMFnVzSysSc';
         const TG_CHAT_ID = '420129066';
 
         const name   = nameInput.value.trim();
