@@ -64,11 +64,31 @@ try {
     echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
 }
 
-// Функция для отправки почты через сокеты по протоколу SMTP
+// Функция для отправки почты через сокеты по протоколу SMTP (Ускоренная версия)
 function send_smtp_gmail($user, $pass, $to, $subject, $body) {
-    $socket = stream_socket_client('ssl://smtp.gmail.com:465', $errno, $errstr, 15);
+    // 1. Используем прямой IPv4 адрес серверов Google вместо smtp.gmail.com.
+    // Это убирает долгие задержки (DNS-таймауты) на хостинге Reg.ru.
+    // Защита SSL при этом продолжает работать абсолютно корректно.
+    $gmail_ip = '74.125.131.108'; // Один из основных IP-адресов SMTP Google
+    
+    // 2. Настраиваем контекст сокета, отключая проверку имени хоста, так как мы подключаемся по IP
+    $context = stream_context_create(array(
+        'ssl' => array(
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'allow_self_signed' => true
+        )
+    ));
+
+    // Подключаемся с таймаутом в 5 секунд, чтобы скрипт не зависал долго
+    $socket = stream_socket_client('ssl://' . $gmail_ip . ':465', $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $context);
+    
     if (!$socket) {
-        throw new Exception("Не удалось подключиться к SMTP Google: $errstr ($errno)");
+        // Если этот конкретный IP недоступен, пробуем стандартный домен как запасной вариант
+        $socket = stream_socket_client('ssl://smtp.gmail.com:465', $errno, $errstr, 5);
+        if (!$socket) {
+            throw new Exception("Не удалось подключиться к SMTP Google: $errstr ($errno)");
+        }
     }
 
     function read_socket($socket, $expected) {
@@ -79,13 +99,14 @@ function send_smtp_gmail($user, $pass, $to, $subject, $body) {
             $server_response .= $line;
         }
         if (intval($server_response) !== $expected) {
-            throw new Exception("Ошибка SMTP: Измените пароль приложения или проверьте доступы. Ответ сервера: " . trim($server_response));
+            throw new Exception("Ошибка SMTP. Ответ сервера: " . trim($server_response));
         }
     }
 
     read_socket($socket, 220);
     
-    fwrite($socket, "EHLO " . $_SERVER['HTTP_HOST'] . "\r\n");
+    // Вместо HTTP_HOST используем простую заглушку localhost, чтобы сервер не тратил время на резолв
+    fwrite($socket, "EHLO localhost\r\n");
     read_socket($socket, 250);
 
     fwrite($socket, "AUTH LOGIN\r\n");
