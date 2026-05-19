@@ -70,47 +70,40 @@ if (form) {
         const originalBtnText = btn.textContent;
         btn.textContent = 'Отправка...';
 
-        // Данные вашего Telegram-бота
-        const TG_TOKEN = '8355809233:AAEFVYvgGUS10yD40zBJVHQdx7ziza54NBU';
+        const TG_TOKEN  = '8355809233:AAEFVYvgGUS10yD40zBJVHQdx7ziza54NBU';
         const TG_CHAT_ID = '420129066';
 
-        // Сбор данных из полей формы
-        const name = nameInput.value.trim();
-        const phone = phoneInput.value.trim();
+        const name   = nameInput.value.trim();
+        const phone  = phoneInput.value.trim();
         const social = this.querySelector('[name="social"]').value.trim();
-        const about = this.querySelector('[name="about"]').value.trim();
+        const about  = this.querySelector('[name="about"]').value.trim();
 
-        // Формирование красивого текста сообщения
-        const messageText = `🔔 *Новая заявка с сайта!* \n\n` +
-                            `👤 *Имя:* ${name || '—'}\n` +
-                            `📞 *Телефон:* ${phone || '—'}\n` +
-                            `💬 *Telegram / WA:* ${social || '—'}\n` +
-                            `📝 *О себе:* ${about || '—'}`;
+        const messageText =
+            `🔔 Новая заявка с сайта!\n\n` +
+            `👤 Имя: ${name || '—'}\n` +
+            `📞 Телефон: ${phone || '—'}\n` +
+            `💬 Telegram / WA: ${social || '—'}\n` +
+            `📝 О себе: ${about || '—'}`;
 
         try {
-            // Отправка напрямую в API Telegram (исправленный URL)
             const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: TG_CHAT_ID,
-                    text: messageText,
-                    parse_mode: 'Markdown'
+                    text: messageText
                 })
             });
 
-            if (res.ok) {
-                const result = await res.json();
-                if (result.ok) {
-                    btn.textContent = '✅ Анкета отправлена!';
-                    btn.style.background = '#1a8a6e';
-                    this.reset();
-                    phoneInput.dispatchEvent(new Event('input'));
-                } else {
-                    throw new Error(result.description || 'Telegram error');
-                }
+            const result = await res.json();
+
+            if (res.ok && result.ok) {
+                btn.textContent = '✅ Анкета отправлена!';
+                btn.style.background = '#1a8a6e';
+                this.reset();
+                phoneInput.dispatchEvent(new Event('input'));
             } else {
-                throw new Error('Server response not ok');
+                throw new Error(result.description || 'Telegram error');
             }
         } catch (err) {
             console.error('Ошибка отправки формы:', err);
