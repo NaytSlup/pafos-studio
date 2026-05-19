@@ -3,7 +3,7 @@ name: Deploy Website
 on:
   push:
     branches:
-      - main # или master, в зависимости от имени вашей главной ветки
+      - main
 
 jobs:
   web-deploy:
@@ -13,10 +13,33 @@ jobs:
     - name: Get latest code
       uses: actions/checkout@v4
     
-    - name: Sync files via FTP
+    - name: Sync main website files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: / # файлы полетят сразу в корень, так как мы ограничили FTP-пользователя папкой сайта
+        server-dir: /
+        # Исключаем локальную папку api, чтобы она не дублировалась в корне сервера
+        exclude: |
+          **/api/**
+          .git*
+          .github/**
+
+    - name: Sync Python script to cgi-bin
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./api/
+        server-dir: /cgi-bin/
+
+    # Выставляем права 755 для Python-скрипта, чтобы сервер Reg.ru разрешил его запуск
+    - name: Change script permissions (CHMOD 755)
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        host: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        command: chmod 755 ./cgi-bin/send_form.py
