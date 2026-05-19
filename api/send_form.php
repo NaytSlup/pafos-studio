@@ -14,7 +14,13 @@ $env_path = __DIR__ . '/.env';
 if (file_exists($env_path)) {
     $lines = file($env_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
+        $line = trim($line);
+        // Пропускаем пустые строки, комментарии и строки без знака =
+        if (empty($line) || strpos($line, '#') === 0 || strpos($line, '=') === false) {
+            continue;
+        }
+        
+        // Теперь разбивать абсолютно безопасно
         list($key, $value) = explode('=', $line, 2);
         $_ENV[trim($key)] = trim($value);
     }
@@ -56,7 +62,6 @@ try {
     $headers .= "Reply-To: <{$gmail_user}>\r\n";
 
     // Отправка через стандартную функцию mail() хостинга Reg.ru
-    // На серверах Reg.ru она отлично работает и шлет письма без внешней авторизации
     if (mail($mail_to, $subject, $html_body, $headers)) {
         echo json_encode(['ok' => true]);
     } else {
