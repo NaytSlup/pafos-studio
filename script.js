@@ -39,7 +39,7 @@ if (phoneEl) {
     });
 }
 
-// ===== ВАЛИДАЦИЯ ФОРМЫ =====
+// ===== ВАЛИДАЦИЯ И ОТПРАВКА ФОРМЫ В ТЕЛЕГРАМ =====
 const form = document.querySelector('.main-form');
 if (form) {
     form.addEventListener('submit', async function(e) {
@@ -70,16 +70,32 @@ if (form) {
         const originalBtnText = btn.textContent;
         btn.textContent = 'Отправка...';
 
+        // Данные вашего Telegram-бота
+        const TG_TOKEN = '8355809233:AAEFVYvgGUS10yD40zBJVHQdx7ziza54NBU';
+        const TG_CHAT_ID = '420129066';
+
+        // Сбор данных из полей формы
+        const name = nameInput.value.trim();
+        const phone = phoneInput.value.trim();
+        const social = this.querySelector('[name="social"]').value.trim();
+        const about = this.querySelector('[name="about"]').value.trim();
+
+        // Формирование красивого текста сообщения
+        const messageText = `🔔 *Новая заявка с сайта!* \n\n` +
+                            `👤 *Имя:* ${name || '—'}\n` +
+                            `📞 *Телефон:* ${phone || '—'}\n` +
+                            `💬 *Telegram / WA:* ${social || '—'}\n` +
+                            `📝 *О себе:* ${about || '—'}`;
+
         try {
-            // ← Путь изменён с /send-form на /api/send-form (Vercel)
-            const res = await fetch('/api/send-form', {
+            // Отправка напрямую в API Telegram (исправленный URL)
+            const res = await fetch(`https://telegram.org{TG_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name:   nameInput.value.trim(),
-                    phone:  phoneInput.value.trim(),
-                    social: this.querySelector('[name="social"]').value.trim(),
-                    about:  this.querySelector('[name="about"]').value.trim()
+                    chat_id: TG_CHAT_ID,
+                    text: messageText,
+                    parse_mode: 'Markdown'
                 })
             });
 
@@ -91,7 +107,7 @@ if (form) {
                     this.reset();
                     phoneInput.dispatchEvent(new Event('input'));
                 } else {
-                    throw new Error(result.error || 'Server error');
+                    throw new Error(result.description || 'Telegram error');
                 }
             } else {
                 throw new Error('Server response not ok');
