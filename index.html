@@ -429,6 +429,54 @@ document.addEventListener('click', e => {
         burgerBtn.classList.remove('burger--active');
     }
 });
+
+// ========== СЮДА ВСТАВИТЬ КОД КАЛЬКУЛЯТОРА ==========
+(function() {
+    function initCalculator() {
+        const daysInput = document.getElementById('days');
+        const hoursInput = document.getElementById('hours');
+        const langInput = document.getElementById('lang');
+
+        if (!daysInput || !hoursInput || !langInput) {
+            console.error('Элементы калькулятора не найдены!');
+            return;
+        }
+
+        function updateCalc() {
+            const days = parseInt(daysInput.value) || 0;
+            const hours = parseInt(hoursInput.value) || 0;
+            const lang = parseInt(langInput.value) || 1;
+
+            document.getElementById('daysVal').innerText = days;
+            document.getElementById('hoursVal').innerText = hours;
+            document.getElementById('langVal').innerText = lang;
+
+            const baseHourly = 357.5;
+            const langBonus = 1 + (lang - 1) * 0.1;
+            const increaseFactor = 2.5;  // Меняй это число для увеличения дохода
+
+            let week = days * hours * baseHourly * langBonus * increaseFactor;
+            let month = week * 4;
+            let year = month * 12;
+
+            document.getElementById('resWeek').innerText = Math.round(week).toLocaleString() + ' ₽';
+            document.getElementById('resMonth').innerText = Math.round(month).toLocaleString() + ' ₽';
+            document.getElementById('resYear').innerText = Math.round(year).toLocaleString() + ' ₽';
+        }
+
+        daysInput.addEventListener('input', updateCalc);
+        hoursInput.addEventListener('input', updateCalc);
+        langInput.addEventListener('input', updateCalc);
+        updateCalc();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCalculator);
+    } else {
+        initCalculator();
+    }
+})();
+
 </script>
 </body>
 </html>
