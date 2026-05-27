@@ -1,45 +1,41 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    const vals = {
-        days: document.getElementById('days'),
-        hours: document.getElementById('hours'),
-        lang: document.getElementById('lang')
-    };
+    // ===== КАЛЬКУЛЯТОР =====
+    const daysInput = document.getElementById('days');
+    const hoursInput = document.getElementById('hours');
+    const langInput = document.getElementById('lang');
 
     function updateCalc() {
-        const d = parseInt(vals.days.value);
-        const h = parseInt(vals.hours.value);
-        const l = parseInt(vals.lang.value);
+        const d = parseInt(daysInput.value) || 0;
+        const h = parseInt(hoursInput.value) || 0;
+        const l = parseInt(langInput.value) || 1;
 
+        // Обновляем подписи
         document.getElementById('daysVal').innerText = d;
         document.getElementById('hoursVal').innerText = h;
         document.getElementById('langVal').innerText = l;
 
-        // 🔥 УВЕЛИЧЕННАЯ МОДЕЛЬ (ТОЧНО ИЗМЕНЯЕТ ЦИФРЫ)
-        const baseHourly = 1800; // было мало → теперь заметно выше
-        const langMult = 1 + (l - 1) * 0.4;
-        const incomeMultiplier = 2.8;
+        // 🔥 ФОРМУЛА С УВЕЛИЧЕННЫМ ДОХОДОМ
+        const baseHourly = 1800;              // базовая ставка за час (было 357 → 1800)
+        const langMult = 1 + (l - 1) * 0.4;   // множитель за английский (1 → 2.6)
+        const incomeMultiplier = 2.8;         // дополнительный множитель
 
         let week = d * h * baseHourly * langMult * incomeMultiplier;
-        let month = week * 4.3;
-        let year = week * 52;
+        let month = week * 4.3;               // среднее число недель в месяце
+        let year = week * 52;                 // 52 недели в году
 
-        document.getElementById('resWeek').innerText =
-            Math.round(week).toLocaleString('ru-RU') + ' ₽';
-
-        document.getElementById('resMonth').innerText =
-            Math.round(month).toLocaleString('ru-RU') + ' ₽';
-
-        document.getElementById('resYear').innerText =
-            Math.round(year).toLocaleString('ru-RU') + ' ₽';
+        document.getElementById('resWeek').innerText = Math.round(week).toLocaleString('ru-RU') + ' ₽';
+        document.getElementById('resMonth').innerText = Math.round(month).toLocaleString('ru-RU') + ' ₽';
+        document.getElementById('resYear').innerText = Math.round(year).toLocaleString('ru-RU') + ' ₽';
     }
 
-    document.getElementById('days').addEventListener('input', updateCalc);
-    document.getElementById('hours').addEventListener('input', updateCalc);
-    document.getElementById('lang').addEventListener('input', updateCalc);
+    // Навешиваем обработчики
+    if (daysInput) daysInput.addEventListener('input', updateCalc);
+    if (hoursInput) hoursInput.addEventListener('input', updateCalc);
+    if (langInput) langInput.addEventListener('input', updateCalc);
 
+    // Первоначальный расчёт
     updateCalc();
-});
 
 // ===== МАСКА ТЕЛЕФОНА =====
 const phoneEl = document.querySelector('[name="phone"]');
