@@ -451,9 +451,9 @@ document.addEventListener('click', e => {
             document.getElementById('hoursVal').innerText = hours;
             document.getElementById('langVal').innerText = lang;
 
-            const baseHourly = 357.5;
-            const langBonus = 1 + (lang - 1) * 0.03;
-            const increaseFactor = 2.5;  // Меняй это число для увеличения дохода
+            const baseHourly = 550;                    // базовая ставка (выше)
+const langBonus = 1 + (lang - 1) * 0.03;   // английский слабо влияет
+const increaseFactor = 2.5;               // общий множитель
 
             let week = days * hours * baseHourly * langBonus * increaseFactor;
             let month = week * 4;
