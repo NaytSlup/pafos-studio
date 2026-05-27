@@ -453,7 +453,7 @@ document.addEventListener('click', e => {
 
             const baseHourly = 530;                    // базовая ставка (выше)
 const langBonus = 1 + (lang - 1) * 0.1;   // английский слабо влияет
-const increaseFactor = 2.5;               // общий множитель
+const increaseFactor = 2;               // общий множитель
 
             let week = days * hours * baseHourly * langBonus * increaseFactor;
             let month = week * 4;
