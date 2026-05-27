@@ -1,4 +1,5 @@
 const inputs = ['days', 'hours', 'lang'];
+
 const vals = {
     days: document.getElementById('days'),
     hours: document.getElementById('hours'),
@@ -14,28 +15,31 @@ function updateCalc() {
     document.getElementById('hoursVal').innerText = h;
     document.getElementById('langVal').innerText = l;
 
-    const baseHourly = 357.5;
-    const langMult = 1 + (l - 1) * 0.1;
-    const incomeMultiplier = 1.5; // Увеличиваем доход в 1.5 раза
+    // 🔥 УСИЛЕННАЯ МОДЕЛЬ ДОХОДА
+    const baseHourly = 1200; // основной рост дохода
+    const langMult = 1 + (l - 1) * 0.3; // английский сильнее влияет
+    const incomeMultiplier = 2.3; // общий буст дохода
 
-    let week = Math.round(d * h * baseHourly * langMult);
-    let month = week * 4;
-    let year = month * 12;
+    let week = d * h * baseHourly * langMult * incomeMultiplier;
+    let month = week * 4.3;
+    let year = week * 52;
 
-    // Применяем умножение
-    week = Math.round(week * incomeMultiplier);
-    month = Math.round(month * incomeMultiplier);
-    year = Math.round(year * incomeMultiplier);
+    document.getElementById('resWeek').innerText =
+        Math.round(week).toLocaleString('ru-RU') + ' ₽';
 
-    document.getElementById('resWeek').innerText = week.toLocaleString() + ' ₽';
-    document.getElementById('resMonth').innerText = month.toLocaleString() + ' ₽';
-    document.getElementById('resYear').innerText = year.toLocaleString() + ' ₽';
+    document.getElementById('resMonth').innerText =
+        Math.round(month).toLocaleString('ru-RU') + ' ₽';
+
+    document.getElementById('resYear').innerText =
+        Math.round(year).toLocaleString('ru-RU') + ' ₽';
 }
 
 inputs.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', updateCalc);
 });
+
+updateCalc();
 
 // ===== МАСКА ТЕЛЕФОНА =====
 const phoneEl = document.querySelector('[name="phone"]');
