@@ -16,10 +16,16 @@ function updateCalc() {
 
     const baseHourly = 357.5;
     const langMult = 1 + (l - 1) * 0.1;
+    const incomeMultiplier = 1.5; // Увеличиваем доход в 1.5 раза
 
-    const week = Math.round(d * h * baseHourly * langMult);
-    const month = week * 4;
-    const year = month * 12;
+    let week = Math.round(d * h * baseHourly * langMult);
+    let month = week * 4;
+    let year = month * 12;
+
+    // Применяем умножение
+    week = Math.round(week * incomeMultiplier);
+    month = Math.round(month * incomeMultiplier);
+    year = Math.round(year * incomeMultiplier);
 
     document.getElementById('resWeek').innerText = week.toLocaleString() + ' ₽';
     document.getElementById('resMonth').innerText = month.toLocaleString() + ' ₽';
