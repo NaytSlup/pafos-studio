@@ -452,7 +452,7 @@ document.addEventListener('click', e => {
             document.getElementById('langVal').innerText = lang;
 
             const baseHourly = 357.5;
-            const langBonus = 1 + (lang - 1) * 0.1;
+            const langBonus = 1 + (lang - 1) * 0.05;
             const increaseFactor = 2.5;  // Меняй это число для увеличения дохода
 
             let week = days * hours * baseHourly * langBonus * increaseFactor;
